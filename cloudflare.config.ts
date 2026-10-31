@@ -38,6 +38,7 @@ export default defineConfig({
       GEMINI_API_KEY: bindings.secret(),
       META_GRAPH_API_VERSION: bindings.text("CONFIGURAR_ANTES_DE_DESPLEGAR"),
       GEMINI_MODEL: bindings.text("gemini-3.5-flash-lite"),
+      BUSINESS_NAME: bindings.text("Novakira"),
       PRODUCT_NAME: bindings.text("Secadora de ropa portátil con bolsa"),
       PRODUCT_PRICE: bindings.text("POR_CONFIGURAR"),
       PRODUCT_FEATURES: bindings.text(

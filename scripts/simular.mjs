@@ -9,6 +9,7 @@ import {
 } from "../src/domain/responses.ts";
 
 const product = {
+  businessName: "Novakira",
   name: "Secadora de ropa portátil con bolsa",
   price: process.env.ROBOTIN_TEST_PRICE ?? "POR_CONFIGURAR",
   specificationsReady: true,

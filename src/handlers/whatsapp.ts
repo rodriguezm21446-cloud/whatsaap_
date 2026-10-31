@@ -26,6 +26,7 @@ export async function handleWhatsAppPayload(payload: unknown, env: Env): Promise
     graphApiVersion: env.META_GRAPH_API_VERSION
   });
   const product: ProductFacts = {
+    businessName: env.BUSINESS_NAME,
     name: env.PRODUCT_NAME,
     price: env.PRODUCT_PRICE,
     specificationsReady: true,

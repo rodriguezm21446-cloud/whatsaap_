@@ -2,6 +2,7 @@
 
 ## 0.2.0 — 2026-10-31
 
+- Robotín se presenta como asistente de Novakira.
 - Ficha verificada de la secadora portátil con bolsa y dimensiones visibles.
 - Eliminada la opción de asesor humano del menú de WhatsApp.
 - Control privado por número desde Telegram para pausar o reactivar Robotín.

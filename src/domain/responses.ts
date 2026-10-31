@@ -2,6 +2,7 @@ import type { Intent } from "./intent.ts";
 import type { GeminiClassification, GeminiResponseKey } from "../ai/gemini.ts";
 
 export interface ProductFacts {
+  businessName: string;
   name: string;
   price: string;
   specificationsReady: boolean;
@@ -38,7 +39,7 @@ export function buildReply(intent: Intent, product: ProductFacts): BotReply {
     case "GREETING":
     case "INTEREST":
       return {
-        text: `¡Hola! 😊 Soy Robotín, tu asistente. Con gusto te ayudo con la ${product.name}.\n\n¿Qué deseas consultar?`,
+        text: `¡Hola! 😊 Soy Robotín, asistente de ${product.businessName}. Con gusto te ayudo con la ${product.name}.\n\n¿Qué deseas consultar?`,
         buttons: menuButtons
       };
     case "PRICE":
@@ -116,7 +117,7 @@ export function buildAllowedVariableReply(
 
   if (responseKey === "MENU") {
     return {
-      text: `${prefix}Soy Robotín, tu asistente para la ${product.name}. ¿Qué deseas consultar?`,
+      text: `${prefix}Soy Robotín, asistente de ${product.businessName} para la ${product.name}. ¿Qué deseas consultar?`,
       buttons: menuButtons
     };
   }

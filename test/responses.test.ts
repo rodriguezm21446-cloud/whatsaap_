@@ -7,6 +7,7 @@ import {
 } from "../src/domain/responses.ts";
 
 const product = {
+  businessName: "Novakira",
   name: "Secadora portátil",
   price: "49.99",
   specificationsReady: false
@@ -25,6 +26,11 @@ const allowedVariables = {
 };
 
 describe("respuestas de Robotín", () => {
+  it("se presenta como asistente de Novakira", () => {
+    const reply = buildReply("GREETING", product);
+    expect(reply.text).toContain("asistente de Novakira");
+  });
+
   it("no muestra asesor humano al cliente", () => {
     const reply = buildReply("INTEREST", product);
     expect(reply.buttons?.map((button) => button.id)).toEqual([

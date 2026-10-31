@@ -1,5 +1,9 @@
 # Ficha verificada del producto
 
+## Negocio
+
+Novakira, página comercial de Facebook. El número comercial se mantiene fuera del repositorio público y se configurará directamente en Meta.
+
 ## Nombre
 
 Secadora de ropa portátil con bolsa.
