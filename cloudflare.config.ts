@@ -7,7 +7,7 @@ export default defineConfig({
   worker: {
     name: "bot-whatsaap",
     entrypoint,
-    compatibilityDate: "2026-10-30",
+    compatibilityDate: "2026-10-31",
     compatibilityFlags: ["nodejs_compat"],
     workersDev: true,
     previewUrls: true,
@@ -38,13 +38,26 @@ export default defineConfig({
       GEMINI_API_KEY: bindings.secret(),
       META_GRAPH_API_VERSION: bindings.text("CONFIGURAR_ANTES_DE_DESPLEGAR"),
       GEMINI_MODEL: bindings.text("gemini-3.5-flash-lite"),
-      PRODUCT_NAME: bindings.text("Secadora portátil"),
+      PRODUCT_NAME: bindings.text("Secadora de ropa portátil con bolsa"),
       PRODUCT_PRICE: bindings.text("POR_CONFIGURAR"),
-      PRODUCT_SPECIFICATIONS: bindings.text("NO_VERIFICADO"),
+      PRODUCT_FEATURES: bindings.text(
+        "Secado con bolsa de aire caliente, diseño ligero y plegable para transportarla y guardarla con facilidad."
+      ),
+      PRODUCT_SIZE: bindings.text(
+        "La unidad principal mide 27 cm de ancho y 19,5 cm de alto según la imagen. La referencia de 10,5 cm aparece en la sección superior, pero falta confirmar qué dimensión representa."
+      ),
+      PRODUCT_SPECIFICATIONS: bindings.text(
+        "Secadora portátil con bolsa de aire caliente; diseño ligero y plegable. Unidad principal de 27 cm de ancho y 19,5 cm de alto según la imagen."
+      ),
+      PRODUCT_USE_CASES: bindings.text(
+        "Ideal para departamentos pequeños, dormitorios, viajes, campamentos o como complemento práctico en casa, especialmente donde no hay secadora convencional."
+      ),
       PRODUCT_DELIVERY: bindings.text("NO_VERIFICADO"),
       PRODUCT_WARRANTY: bindings.text("NO_VERIFICADO"),
       PRODUCT_STOCK: bindings.text("NO_VERIFICADO"),
-      PRODUCT_USAGE: bindings.text("NO_VERIFICADO")
+      PRODUCT_USAGE: bindings.text(
+        "Se colocan prendas previamente lavadas y húmedas dentro de la bolsa para secarlas con aire caliente. La carga máxima y el procedimiento exacto deben confirmarse con el manual del producto."
+      )
     },
     triggers: [
       triggers.queue({

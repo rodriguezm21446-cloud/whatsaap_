@@ -18,7 +18,8 @@ describe("GeminiProductAssistant", () => {
               parts: [
                 {
                   text: JSON.stringify({
-                    response_key: "PAYMENT"
+                    response_key: "PAYMENT",
+                    opener: "NEUTRAL"
                   })
                 }
               ]
@@ -29,7 +30,7 @@ describe("GeminiProductAssistant", () => {
     );
 
     const result = await createAssistant(fetchFn).classify("¿Cómo pago?");
-    expect(result).toBe("PAYMENT");
+    expect(result).toEqual({ response_key: "PAYMENT", opener: "NEUTRAL" });
   });
 
   it("no envía más de 1000 caracteres de la pregunta", async () => {
@@ -41,7 +42,8 @@ describe("GeminiProductAssistant", () => {
               parts: [
                 {
                   text: JSON.stringify({
-                    response_key: "SPECIFICATIONS"
+                    response_key: "SPECIFICATIONS",
+                    opener: "NEUTRAL"
                   })
                 }
               ]

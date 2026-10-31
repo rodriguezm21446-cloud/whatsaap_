@@ -3,13 +3,12 @@ import type { NotificationJob } from "./types.ts";
 
 export async function processNotification(job: NotificationJob, env: Env): Promise<void> {
   const telegram = new TelegramClient(env.TELEGRAM_BOT_TOKEN, env.TELEGRAM_CHAT_ID);
-  if (job.type === "ADVISOR_REQUEST") {
-    await telegram.sendOwnerDecision(
+  if (job.type === "CHAT_CONTROL") {
+    await telegram.sendChatControl(
       job.conversationId,
-      `👤 CLIENTE SOLICITA ASESOR HUMANO\n\n` +
+      `💬 NUEVO CHAT EN WHATSAPP\n\n` +
         `WhatsApp: ${job.whatsappId}\n` +
-        `Mensaje: “${job.lastMessage.slice(0, 300)}”\n\n` +
-        "Robotín quedó pausado solamente en este chat."
+        "Robotín está activo únicamente para este chat. Puedes pausarlo o reactivarlo cuando quieras."
     );
     return;
   }
@@ -29,7 +28,7 @@ export async function processNotification(job: NotificationJob, env: Env): Promi
   }
 
   await telegram.sendText(
-    `📩 MENSAJE EN MODO HUMANO\n\nWhatsApp: ${job.whatsappIdMasked}\nMensaje: “${job.message.slice(0, 500)}”`
+    `📩 MENSAJE CON ROBOTÍN PAUSADO\n\nWhatsApp: ${job.whatsappId}\nMensaje: “${job.message.slice(0, 500)}”`
   );
 }
 

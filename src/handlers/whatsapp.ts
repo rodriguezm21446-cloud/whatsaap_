@@ -6,6 +6,7 @@ import {
   buildAllowedVariableReply,
   buildPreCheckoutReply,
   buildReply,
+  type AllowedProductVariables,
   type ProductFacts
 } from "../domain/responses.ts";
 import { WhatsAppClient } from "../integrations/whatsapp/client.ts";
@@ -27,11 +28,24 @@ export async function handleWhatsAppPayload(payload: unknown, env: Env): Promise
   const product: ProductFacts = {
     name: env.PRODUCT_NAME,
     price: env.PRODUCT_PRICE,
-    specificationsReady: false
+    specificationsReady: true,
+    specifications: env.PRODUCT_SPECIFICATIONS
+  };
+  const allowedProduct: AllowedProductVariables = {
+    ...product,
+    features: env.PRODUCT_FEATURES,
+    size: env.PRODUCT_SIZE,
+    specifications: env.PRODUCT_SPECIFICATIONS,
+    useCases: env.PRODUCT_USE_CASES,
+    delivery: env.PRODUCT_DELIVERY,
+    warranty: env.PRODUCT_WARRANTY,
+    stock: env.PRODUCT_STOCK,
+    usage: env.PRODUCT_USAGE
   };
 
   for (const message of extractMessages(payload)) {
-    const conversation = await conversations.getOrCreate(message.from);
+    const lookup = await conversations.getOrCreate(message.from);
+    const conversation = lookup.conversation;
     const isNew = await events.recordInbound(
       conversation.id,
       message.id,
@@ -39,11 +53,19 @@ export async function handleWhatsAppPayload(payload: unknown, env: Env): Promise
     );
     if (!isNew) continue;
 
+    if (lookup.created) {
+      await env.NOTIFICATIONS.send({
+        type: "CHAT_CONTROL",
+        conversationId: conversation.id,
+        whatsappId: message.from
+      });
+    }
+
     if (conversation.mode === "HUMAN") {
       await env.NOTIFICATIONS.send({
         type: "HUMAN_MESSAGE",
         conversationId: conversation.id,
-        whatsappIdMasked: maskWhatsappId(message.from),
+        whatsappId: message.from,
         message: message.text
       });
       continue;
@@ -51,24 +73,6 @@ export async function handleWhatsAppPayload(payload: unknown, env: Env): Promise
     if (conversation.mode === "WAITING_OWNER") continue;
 
     const intent = detectIntent(message.text, message.interactiveId);
-    if (intent === "HUMAN_HANDOFF") {
-      await conversations.setControl(conversation.id, "HUMAN", "EVALUATING");
-      await Promise.all([
-        whatsapp.sendReply(message.from, {
-          text:
-            "Claro 👤 Ya avisé al asesor y pausé mis respuestas automáticas en este chat. " +
-            "Puedes dejar aquí tu mensaje y te responderá una persona."
-        }),
-        env.NOTIFICATIONS.send({
-          type: "ADVISOR_REQUEST",
-          conversationId: conversation.id,
-          whatsappId: message.from,
-          lastMessage: message.text || "Seleccionó el botón Asesor humano"
-        })
-      ]);
-      continue;
-    }
-
     if (message.interactiveId === "cancel_checkout") {
       await whatsapp.sendReply(message.from, {
         text: "No hay problema 😊 Si después deseas continuar o tienes otra pregunta, aquí estaré para ayudarte."
@@ -100,23 +104,16 @@ export async function handleWhatsAppPayload(payload: unknown, env: Env): Promise
       continue;
     }
 
-    if (intent === "OTHER_QUESTION") {
+    if (!message.interactiveId && intent !== "PURCHASE_INTENT") {
       try {
         const assistant = new GeminiProductAssistant({
           apiKey: env.GEMINI_API_KEY,
           model: env.GEMINI_MODEL
         });
-        const responseKey = await assistant.classify(message.text);
+        const classification = await assistant.classify(message.text);
         await whatsapp.sendReply(
           message.from,
-          buildAllowedVariableReply(responseKey, {
-            ...product,
-            specifications: env.PRODUCT_SPECIFICATIONS,
-            delivery: env.PRODUCT_DELIVERY,
-            warranty: env.PRODUCT_WARRANTY,
-            stock: env.PRODUCT_STOCK,
-            usage: env.PRODUCT_USAGE
-          })
+          buildAllowedVariableReply(classification, allowedProduct)
         );
       } catch (error) {
         console.error(
@@ -126,11 +123,11 @@ export async function handleWhatsAppPayload(payload: unknown, env: Env): Promise
           })
         );
         await whatsapp.sendReply(message.from, {
-          text: "No pude verificar esa información en este momento. Puedo mostrarte el costo, las especificaciones disponibles o avisar a un asesor.",
+          text: "No pude clasificar esa consulta en este momento. Puedes consultar el costo, ver los detalles o iniciar el pedido.",
           buttons: [
             { id: "show_price", title: "Consultar costo" },
-            { id: "show_specs", title: "Especificaciones" },
-            { id: "human_advisor", title: "Asesor humano" }
+            { id: "show_specs", title: "Ver detalles" },
+            { id: "continue_purchase", title: "Hacer pedido" }
           ]
         });
       }

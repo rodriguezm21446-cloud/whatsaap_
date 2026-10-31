@@ -5,7 +5,6 @@ export const intents = [
   "SPECIFICATIONS",
   "HOW_IT_WORKS",
   "PURCHASE_INTENT",
-  "HUMAN_HANDOFF",
   "OTHER_QUESTION",
   "UNKNOWN"
 ] as const;
@@ -30,8 +29,7 @@ export function detectIntent(rawText: string, interactiveId?: string): Intent {
   if (id === "show_price") return "PRICE";
   if (id === "show_specs") return "SPECIFICATIONS";
   if (id === "show_how_it_works") return "HOW_IT_WORKS";
-  if (id === "human_advisor") return "HUMAN_HANDOFF";
-  if (id === "show_menu" || id === "continue_questions") return "INTEREST";
+  if (id === "show_menu" || id === "continue_questions" || id === "other_question") return "INTEREST";
 
   const text = normalize(rawText);
   if (!text) return "UNKNOWN";
@@ -51,18 +49,6 @@ export function detectIntent(rawText: string, interactiveId?: string): Intent {
     ])
   ) {
     return "PURCHASE_INTENT";
-  }
-
-  if (
-    containsAny(text, [
-      "hablar con un asesor",
-      "hablar con asesor",
-      "hablar con una persona",
-      "asesor humano",
-      "atencion humana"
-    ])
-  ) {
-    return "HUMAN_HANDOFF";
   }
 
   if (containsAny(text, ["precio", "cuanto cuesta", "cuanto vale", "que valor", "en cuanto sale"])) {

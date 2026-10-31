@@ -14,6 +14,24 @@ export async function handleTelegramPayload(payload: unknown, env: Env): Promise
   const conversations = new ConversationRepository(env.DB);
   const telegram = new TelegramClient(env.TELEGRAM_BOT_TOKEN, env.TELEGRAM_CHAT_ID);
 
+  if (action === "resume") {
+    const changed = await conversations.setControl(conversationId, "BOT", "START");
+    await telegram.answerCallback(
+      callback.id,
+      changed ? "Robotín quedó activo solamente en este chat." : "No encontré esa conversación."
+    );
+    return;
+  }
+
+  if (action === "pause") {
+    const changed = await conversations.setControl(conversationId, "HUMAN", "EVALUATING");
+    await telegram.answerCallback(
+      callback.id,
+      changed ? "Robotín quedó pausado solamente en este chat." : "No encontré esa conversación."
+    );
+    return;
+  }
+
   if (action === "continue") {
     const changed = await conversations.setControl(conversationId, "BOT", "COLLECTING_DATA");
     await telegram.answerCallback(

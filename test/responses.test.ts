@@ -14,7 +14,10 @@ const product = {
 
 const allowedVariables = {
   ...product,
+  features: "Diseño ligero y plegable.",
+  size: "27 cm de ancho y 19,5 cm de alto.",
   specifications: "NO_VERIFICADO",
+  useCases: "Departamentos pequeños y viajes.",
   delivery: "Entrega nacional de 2 a 5 días laborables.",
   warranty: "NO_VERIFICADO",
   stock: "NO_VERIFICADO",
@@ -22,12 +25,12 @@ const allowedVariables = {
 };
 
 describe("respuestas de Robotín", () => {
-  it("muestra asesor humano como última opción", () => {
+  it("no muestra asesor humano al cliente", () => {
     const reply = buildReply("INTEREST", product);
     expect(reply.buttons?.map((button) => button.id)).toEqual([
       "show_price",
       "show_specs",
-      "human_advisor"
+      "continue_purchase"
     ]);
   });
 
@@ -54,28 +57,55 @@ describe("respuestas de Robotín", () => {
     expect(reply.buttons?.map((button) => button.id)).toContain("cancel_checkout");
   });
 
-  it("después del precio pregunta el siguiente paso y deja al asesor al final", () => {
+  it("después del precio mantiene la conversación dentro de la venta", () => {
     const reply = buildReply("PRICE", product);
     expect(reply.buttons?.map((button) => button.id)).toEqual([
       "continue_purchase",
-      "continue_questions",
-      "human_advisor"
+      "show_specs",
+      "show_menu"
     ]);
   });
 
   it("no inventa una variable que no está verificada", () => {
-    const reply = buildAllowedVariableReply("SPECIFICATIONS", allowedVariables);
+    const reply = buildAllowedVariableReply(
+      { response_key: "SPECIFICATIONS", opener: "NEUTRAL" },
+      allowedVariables
+    );
     expect(reply.text).toBe("Ese dato todavía no está verificado. Prefiero no inventarte información.");
   });
 
   it("responde con el valor exacto permitido por el código", () => {
-    const reply = buildAllowedVariableReply("DELIVERY", allowedVariables);
+    const reply = buildAllowedVariableReply(
+      { response_key: "DELIVERY", opener: "NEUTRAL" },
+      allowedVariables
+    );
     expect(reply.text).toContain(allowedVariables.delivery);
   });
 
   it("bloquea temas ajenos con una respuesta fija", () => {
-    const reply = buildAllowedVariableReply("OFF_TOPIC", allowedVariables);
+    const reply = buildAllowedVariableReply(
+      { response_key: "OFF_TOPIC", opener: "NEUTRAL" },
+      allowedVariables
+    );
     expect(reply.text).toContain("únicamente con la secadora portátil");
+  });
+
+  it("humaniza una consulta mixta sin permitir texto libre de Gemini", () => {
+    const reply = buildAllowedVariableReply(
+      { response_key: "PRICE", opener: "LIKED_VIDEO" },
+      allowedVariables
+    );
+    expect(reply.text).toContain("Qué bueno que te gustó el video");
+    expect(reply.text).toContain("$49.99");
+  });
+
+  it("aclara que secar no significa lavar ni desinfectar", () => {
+    const reply = buildAllowedVariableReply(
+      { response_key: "HYGIENE", opener: "NEUTRAL" },
+      allowedVariables
+    );
+    expect(reply.text).toContain("seca prendas previamente lavadas");
+    expect(reply.text).toContain("No está verificado");
   });
 });
 

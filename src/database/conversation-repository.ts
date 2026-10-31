@@ -20,15 +20,20 @@ const mapRow = (row: ConversationRow): Conversation => ({
   updatedAt: row.updated_at
 });
 
+export interface ConversationLookup {
+  conversation: Conversation;
+  created: boolean;
+}
+
 export class ConversationRepository {
   constructor(private readonly db: D1Database) {}
 
-  async getOrCreate(whatsappId: string): Promise<Conversation> {
+  async getOrCreate(whatsappId: string): Promise<ConversationLookup> {
     const existing = await this.db
       .prepare("SELECT * FROM conversations WHERE whatsapp_id = ? LIMIT 1")
       .bind(whatsappId)
       .first<ConversationRow>();
-    if (existing) return mapRow(existing);
+    if (existing) return { conversation: mapRow(existing), created: false };
 
     const id = crypto.randomUUID();
     const now = new Date().toISOString();
@@ -39,13 +44,16 @@ export class ConversationRepository {
       .bind(id, whatsappId, now, now)
       .run();
     return {
-      id,
-      whatsappId,
-      mode: "BOT",
-      state: "START",
-      version: 1,
-      createdAt: now,
-      updatedAt: now
+      conversation: {
+        id,
+        whatsappId,
+        mode: "BOT",
+        state: "START",
+        version: 1,
+        createdAt: now,
+        updatedAt: now
+      },
+      created: true
     };
   }
 

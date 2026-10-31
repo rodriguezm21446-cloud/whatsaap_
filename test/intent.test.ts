@@ -20,11 +20,7 @@ describe("detectIntent", () => {
   it("acepta los identificadores de botones", () => {
     expect(detectIntent("", "show_specs")).toBe("SPECIFICATIONS");
     expect(detectIntent("", "confirm_checkout")).toBe("PURCHASE_INTENT");
-    expect(detectIntent("", "human_advisor")).toBe("HUMAN_HANDOFF");
-  });
-
-  it("detecta cuando el cliente pide una persona", () => {
-    expect(detectIntent("Quiero hablar con un asesor")).toBe("HUMAN_HANDOFF");
+    expect(detectIntent("", "other_question")).toBe("INTEREST");
   });
 });
 

@@ -1,10 +1,11 @@
 import type { Intent } from "./intent.ts";
-import type { GeminiResponseKey } from "../ai/gemini.ts";
+import type { GeminiClassification, GeminiResponseKey } from "../ai/gemini.ts";
 
 export interface ProductFacts {
   name: string;
   price: string;
   specificationsReady: boolean;
+  specifications?: string;
 }
 
 export interface BotReply {
@@ -14,15 +15,22 @@ export interface BotReply {
 
 const menuButtons = [
   { id: "show_price", title: "📦 Consultar costo" },
-  { id: "show_specs", title: "❓ Especificaciones" },
-  { id: "human_advisor", title: "👤 Asesor humano" }
+  { id: "show_specs", title: "❓ Ver detalles" },
+  { id: "continue_purchase", title: "🛒 Hacer pedido" }
 ];
 
 const nextStepButtons = [
   { id: "continue_purchase", title: "Hacer pedido" },
-  { id: "continue_questions", title: "Seguir consultando" },
-  { id: "human_advisor", title: "Asesor humano" }
+  { id: "show_specs", title: "Ver detalles" },
+  { id: "show_menu", title: "Menú" }
 ];
+
+const openerText = (opener: GeminiClassification["opener"]): string => {
+  if (opener === "LIKED_VIDEO") return "¡Qué bueno que te gustó el video! 😊 ";
+  if (opener === "POSITIVE_INTEREST") return "¡Qué bueno que te interesó! 😊 ";
+  if (opener === "GREETING") return "¡Hola! 😊 ";
+  return "";
+};
 
 export function buildReply(intent: Intent, product: ProductFacts): BotReply {
   const priceReady = product.price !== "POR_CONFIGURAR";
@@ -43,7 +51,7 @@ export function buildReply(intent: Intent, product: ProductFacts): BotReply {
     case "SPECIFICATIONS":
       return product.specificationsReady
         ? {
-            text: "Aquí irán únicamente las especificaciones verificadas del producto.",
+            text: product.specifications ?? "Las especificaciones verificadas están disponibles.",
             buttons: nextStepButtons
           }
         : {
@@ -80,7 +88,10 @@ export function buildPreCheckoutReply(product: ProductFacts): BotReply {
 }
 
 export interface AllowedProductVariables extends ProductFacts {
+  features: string;
+  size: string;
   specifications: string;
+  useCases: string;
   delivery: string;
   warranty: string;
   stock: string;
@@ -90,26 +101,56 @@ export interface AllowedProductVariables extends ProductFacts {
 const isVerified = (value: string): boolean => value !== "NO_VERIFICADO";
 
 export function buildAllowedVariableReply(
-  responseKey: GeminiResponseKey,
+  classification: GeminiClassification,
   product: AllowedProductVariables
 ): BotReply {
+  const { response_key: responseKey, opener } = classification;
+  const prefix = openerText(opener);
+
   if (responseKey === "OFF_TOPIC") {
     return {
-      text: "Puedo ayudarte únicamente con la secadora portátil 😊 ¿Qué deseas consultar?",
+      text: `${prefix}Puedo ayudarte únicamente con la secadora portátil. ¿Qué deseas consultar?`,
       buttons: menuButtons
     };
   }
 
-  if (responseKey === "PRICE") return buildReply("PRICE", product);
+  if (responseKey === "MENU") {
+    return {
+      text: `${prefix}Soy Robotín, tu asistente para la ${product.name}. ¿Qué deseas consultar?`,
+      buttons: menuButtons
+    };
+  }
+
+  if (responseKey === "PRICE") {
+    const priceReady = product.price !== "POR_CONFIGURAR";
+    return {
+      text: priceReady
+        ? `${prefix}La ${product.name} cuesta $${product.price}. El pago es contra entrega: pagas cuando la recibes.`
+        : `${prefix}Estoy confirmando el precio para no darte un valor equivocado.`,
+      buttons: nextStepButtons
+    };
+  }
   if (responseKey === "PAYMENT") {
     return {
-      text: "El pago es contra entrega: pagas cuando recibes el producto.",
+      text: `${prefix}El pago es contra entrega: pagas cuando recibes el producto.`,
+      buttons: nextStepButtons
+    };
+  }
+
+  if (responseKey === "HYGIENE") {
+    return {
+      text:
+        `${prefix}Este producto seca prendas previamente lavadas. ` +
+        "No está verificado que lave, desinfecte ni realice limpieza profunda.",
       buttons: nextStepButtons
     };
   }
 
   const values: Partial<Record<GeminiResponseKey, { label: string; value: string }>> = {
+    FEATURES: { label: "Sus características verificadas son", value: product.features },
+    SIZE: { label: "Las medidas verificadas son", value: product.size },
     SPECIFICATIONS: { label: "Las especificaciones verificadas son", value: product.specifications },
+    USE_CASES: { label: "Los usos recomendados son", value: product.useCases },
     DELIVERY: { label: "La información verificada de entrega es", value: product.delivery },
     WARRANTY: { label: "La garantía verificada es", value: product.warranty },
     STOCK: { label: "La disponibilidad verificada es", value: product.stock },
@@ -121,18 +162,14 @@ export function buildAllowedVariableReply(
     return {
       text:
         responseKey === "UNKNOWN"
-          ? "No logré identificar esa consulta. Puedo ayudarte con costo, especificaciones o comunicarte con un asesor."
-          : "Ese dato todavía no está verificado. Prefiero no inventarte información.",
-      buttons: [
-        { id: "show_price", title: "Consultar costo" },
-        { id: "show_specs", title: "Especificaciones" },
-        { id: "human_advisor", title: "Asesor humano" }
-      ]
+          ? `${prefix}No logré identificar esa consulta. Puedo ayudarte con costo, detalles o el pedido.`
+          : `${prefix}Ese dato todavía no está verificado. Prefiero no inventarte información.`,
+      buttons: menuButtons
     };
   }
 
   return {
-    text: `${selected.label}: ${selected.value}`,
+    text: `${prefix}${selected.label}: ${selected.value}`,
     buttons: nextStepButtons
   };
 }

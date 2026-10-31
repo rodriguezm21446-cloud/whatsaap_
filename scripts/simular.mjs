@@ -9,18 +9,27 @@ import {
 } from "../src/domain/responses.ts";
 
 const product = {
-  name: "Secadora portátil",
+  name: "Secadora de ropa portátil con bolsa",
   price: process.env.ROBOTIN_TEST_PRICE ?? "POR_CONFIGURAR",
-  specificationsReady: false
+  specificationsReady: true,
+  specifications:
+    "Secadora portátil con bolsa de aire caliente; diseño ligero y plegable. Unidad principal de 27 cm de ancho y 19,5 cm de alto según la imagen."
 };
 
 const allowedVariables = {
   ...product,
-  specifications: process.env.ROBOTIN_TEST_SPECIFICATIONS ?? "NO_VERIFICADO",
+  features:
+    "Secado con bolsa de aire caliente, diseño ligero y plegable para transportarla y guardarla con facilidad.",
+  size:
+    "La unidad principal mide 27 cm de ancho y 19,5 cm de alto. La referencia de 10,5 cm requiere confirmación.",
+  specifications: product.specifications,
+  useCases:
+    "Ideal para departamentos pequeños, dormitorios, viajes, campamentos o donde no hay secadora convencional.",
   delivery: process.env.ROBOTIN_TEST_DELIVERY ?? "NO_VERIFICADO",
   warranty: process.env.ROBOTIN_TEST_WARRANTY ?? "NO_VERIFICADO",
   stock: process.env.ROBOTIN_TEST_STOCK ?? "NO_VERIFICADO",
-  usage: process.env.ROBOTIN_TEST_USAGE ?? "NO_VERIFICADO"
+  usage:
+    "Seca con aire caliente prendas previamente lavadas y húmedas dentro de la bolsa; falta confirmar la carga máxima en el manual."
 };
 
 const gemini = process.env.GEMINI_API_KEY
@@ -33,7 +42,7 @@ const gemini = process.env.GEMINI_API_KEY
 const choices = new Map([
   ["1", "show_price"],
   ["2", "show_specs"],
-  ["3", "human_advisor"]
+  ["3", "continue_purchase"]
 ]);
 
 const showReply = (reply) => {
@@ -67,12 +76,6 @@ try {
 
     const interactiveId = choices.get(message);
     const intent = detectIntent(message, interactiveId);
-    if (intent === "HUMAN_HANDOFF") {
-      output.write("\nRobotín: Claro 👤 Ya avisé al asesor y pausé mis respuestas automáticas en este chat.\n");
-      output.write("[SIMULACIÓN TELEGRAM] Llegaría el número del cliente y la solicitud de atención.\n");
-      output.write("\nCliente: ");
-      continue;
-    }
     if (interactiveId === "continue_purchase" || intent === "PURCHASE_INTENT") {
       showReply(buildPreCheckoutReply(product));
       output.write("Para simular el botón 'Sí, continuar', escribe: si\n");
@@ -81,10 +84,10 @@ try {
       continue;
     }
 
-    if (intent === "OTHER_QUESTION" && gemini) {
+    if (!interactiveId && gemini) {
       try {
-        const responseKey = await gemini.classify(message);
-        showReply(buildAllowedVariableReply(responseKey, allowedVariables));
+        const classification = await gemini.classify(message);
+        showReply(buildAllowedVariableReply(classification, allowedVariables));
       } catch {
         output.write("\nRobotín: No pude verificar esa consulta ahora. Puedes usar las opciones del menú.\n");
       }

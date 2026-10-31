@@ -4,6 +4,22 @@ export class TelegramClient {
     private readonly chatId: string
   ) {}
 
+  async sendChatControl(conversationId: string, text: string): Promise<void> {
+    await this.call("sendMessage", {
+      chat_id: this.chatId,
+      text,
+      protect_content: true,
+      reply_markup: {
+        inline_keyboard: [
+          [
+            { text: "⏸️ Pausar este chat", callback_data: `pause:${conversationId}` },
+            { text: "▶️ Activar Robotín", callback_data: `resume:${conversationId}` }
+          ]
+        ]
+      }
+    });
+  }
+
   async sendOwnerDecision(conversationId: string, text: string): Promise<void> {
     await this.call("sendMessage", {
       chat_id: this.chatId,

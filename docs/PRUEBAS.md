@@ -20,7 +20,7 @@ Estas comprobaciones validan la clasificación de mensajes, las respuestas, la p
 npm run simular
 ```
 
-Escribir mensajes como `Hola`, `Me interesa`, `¿cuánto cuesta?` o `quiero comprar`. El simulador no usa Internet, no guarda el chat y no necesita claves. Para finalizar, escribir `salir`.
+Escribir mensajes como `Hola`, `Hola, me gustó el video que vi, ¿cuánto vale?`, `¿también lava?` o `quiero comprar`. Sin `GEMINI_API_KEY`, el simulador usa las rutas deterministas; con una clave temporal también prueba el clasificador real. Para finalizar, escribir `salir`.
 
 Para probar temporalmente un precio sin modificar archivos:
 
@@ -45,10 +45,10 @@ No debe conectarse el número comercial hasta terminar las pruebas de conversaci
 Cuando Meta y Telegram estén configurados, usar primero los números de prueba de WhatsApp Cloud API. Verificar este recorrido:
 
 1. El cliente escribe `Hola, me interesa`.
-2. Robotín ofrece costo, especificaciones o asesor humano, siempre en ese orden.
+2. Robotín ofrece costo, detalles o hacer pedido, siempre en ese orden.
 3. Al elegir comprar, Robotín muestra precio y pago contra entrega antes de pedir datos.
 4. Solo después de confirmar, Telegram recibe la decisión.
-5. `Tomar el mando` silencia a Robotín únicamente en ese chat.
+5. Telegram recibe un control separado por número; `Pausar este chat` silencia a Robotín únicamente allí y `Activar Robotín` lo reanuda.
 6. Un webhook sin firma válida recibe `401` y uno demasiado grande recibe `413`.
 
 Nunca usar clientes reales, cédulas, direcciones ni ubicaciones durante esta etapa.

@@ -1,9 +1,8 @@
 export type NotificationJob =
   | {
-      type: "ADVISOR_REQUEST";
+      type: "CHAT_CONTROL";
       conversationId: string;
       whatsappId: string;
-      lastMessage: string;
     }
   | {
       type: "OWNER_DECISION";
@@ -16,7 +15,7 @@ export type NotificationJob =
   | {
       type: "HUMAN_MESSAGE";
       conversationId: string;
-      whatsappIdMasked: string;
+      whatsappId: string;
       message: string;
     };
 
