@@ -1,0 +1,30 @@
+{
+  "name": "bot-whatsaap",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Robotín: asistente de ventas por WhatsApp para una secadora portátil con pago contra entrega.",
+  "scripts": {
+    "build": "cf build",
+    "dev": "cf dev",
+    "types": "cf workers types",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "simular": "node scripts/simular.mjs"
+  },
+  "dependencies": {
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "2.0.0-beta.v.8",
+    "@cloudflare/vitest-plugin": "1.4.11",
+    "cf": "1.0.0-beta.26",
+    "typescript": "7.0.2",
+    "vite": "8.3.5",
+    "vitest": "4.1.12"
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  }
+}
