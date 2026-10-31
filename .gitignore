@@ -1,0 +1,11 @@
+node_modules/
+node_modules.incomplete/
+.cloudflare/
+.dev.vars
+.env
+.env.*
+!.env.example
+.npm-cache/
+coverage/
+dist/
+*.log
