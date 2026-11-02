@@ -2,6 +2,9 @@
 
 ## 0.2.0 — 2026-10-31
 
+- Adaptador seguro para probar conversaciones reales con Twilio WhatsApp Sandbox.
+- Entrega: el plazo se confirma después de generarse la guía de transporte.
+- Gemini queda reservado para preguntas que las reglas locales no reconocen.
 - Robotín se presenta como asistente de Novakira.
 - Ficha verificada de la secadora portátil con bolsa y dimensiones visibles.
 - Eliminada la opción de asesor humano del menú de WhatsApp.

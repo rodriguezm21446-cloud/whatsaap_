@@ -1,8 +1,17 @@
 import { describe, expect, it } from "vitest";
 
-import { detectIntent } from "../src/domain/intent.ts";
+import { detectIntent, needsGemini } from "../src/domain/intent.ts";
 
 describe("detectIntent", () => {
+  it("no gasta tokens de Gemini en intenciones comerciales comunes", () => {
+    expect(needsGemini(detectIntent("Hola, vi el video, ¿cuánto vale?"))).toBe(false);
+    expect(needsGemini(detectIntent("Quiero comprar"))).toBe(false);
+  });
+
+  it("reserva Gemini para preguntas no cubiertas por reglas locales", () => {
+    expect(needsGemini(detectIntent("¿Hace mucho ruido durante la noche?"))).toBe(true);
+  });
+
   it.each([
     "quiero comprar una",
     "Sí quiero una",

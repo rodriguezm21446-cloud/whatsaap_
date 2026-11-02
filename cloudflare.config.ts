@@ -7,7 +7,7 @@ export default defineConfig({
   worker: {
     name: "bot-whatsaap",
     entrypoint,
-    compatibilityDate: "2026-10-31",
+    compatibilityDate: "2026-11-02",
     compatibilityFlags: ["nodejs_compat"],
     workersDev: true,
     previewUrls: true,
@@ -36,6 +36,7 @@ export default defineConfig({
       TELEGRAM_OWNER_ID: bindings.secret(),
       TELEGRAM_WEBHOOK_SECRET: bindings.secret(),
       GEMINI_API_KEY: bindings.secret(),
+      TWILIO_AUTH_TOKEN: bindings.secret(),
       META_GRAPH_API_VERSION: bindings.text("CONFIGURAR_ANTES_DE_DESPLEGAR"),
       GEMINI_MODEL: bindings.text("gemini-3.5-flash-lite"),
       BUSINESS_NAME: bindings.text("Novakira"),
@@ -53,7 +54,9 @@ export default defineConfig({
       PRODUCT_USE_CASES: bindings.text(
         "Ideal para departamentos pequeños, dormitorios, viajes, campamentos o como complemento práctico en casa, especialmente donde no hay secadora convencional."
       ),
-      PRODUCT_DELIVERY: bindings.text("NO_VERIFICADO"),
+      PRODUCT_DELIVERY: bindings.text(
+        "El plazo se confirma cuando la empresa transportadora genera el código o guía de seguimiento. Todavía no se promete un tiempo exacto."
+      ),
       PRODUCT_WARRANTY: bindings.text("NO_VERIFICADO"),
       PRODUCT_STOCK: bindings.text("NO_VERIFICADO"),
       PRODUCT_USAGE: bindings.text(

@@ -1,7 +1,7 @@
 import { ConversationRepository } from "../database/conversation-repository.ts";
 import { EventRepository } from "../database/event-repository.ts";
 import { GeminiProductAssistant } from "../ai/gemini.ts";
-import { detectIntent } from "../domain/intent.ts";
+import { detectIntent, needsGemini } from "../domain/intent.ts";
 import {
   buildAllowedVariableReply,
   buildPreCheckoutReply,
@@ -105,7 +105,7 @@ export async function handleWhatsAppPayload(payload: unknown, env: Env): Promise
       continue;
     }
 
-    if (!message.interactiveId && intent !== "PURCHASE_INTENT") {
+    if (!message.interactiveId && needsGemini(intent)) {
       try {
         const assistant = new GeminiProductAssistant({
           apiKey: env.GEMINI_API_KEY,

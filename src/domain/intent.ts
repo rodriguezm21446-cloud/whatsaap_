@@ -11,6 +11,9 @@ export const intents = [
 
 export type Intent = (typeof intents)[number];
 
+export const needsGemini = (intent: Intent): boolean =>
+  intent === "OTHER_QUESTION" || intent === "UNKNOWN";
+
 const normalize = (text: string): string =>
   text
     .normalize("NFD")

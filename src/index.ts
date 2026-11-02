@@ -1,7 +1,10 @@
 import { handleTelegramPayload } from "./handlers/telegram.ts";
+import { handleTwilioSandboxMessage } from "./handlers/twilio.ts";
 import { handleWhatsAppPayload } from "./handlers/whatsapp.ts";
 import { BodyTooLargeError, readTextBody } from "./http/body.ts";
 import { verifySecret, verifyWebhookSignature } from "./integrations/whatsapp/security.ts";
+import { verifyTwilioSignature } from "./integrations/twilio/security.ts";
+import { toTwiml } from "./integrations/twilio/twiml.ts";
 import { processNotification } from "./notifications/processor.ts";
 import type { NotificationJob } from "./notifications/types.ts";
 
@@ -34,6 +37,26 @@ async function handleFetch(request: Request, env: Env, ctx: ExecutionContext): P
     const payload: unknown = JSON.parse(rawBody);
     ctx.waitUntil(handleWhatsAppPayload(payload, env));
     return json({ accepted: true }, 202);
+  }
+
+  if (request.method === "POST" && url.pathname === "/webhooks/twilio") {
+    const contentType = request.headers.get("content-type")?.toLowerCase() ?? "";
+    if (!contentType.startsWith("application/x-www-form-urlencoded")) {
+      return json({ error: "unsupported_media_type" }, 415);
+    }
+    const rawBody = await readTextBody(request, MAX_WEBHOOK_BYTES);
+    const params = new URLSearchParams(rawBody);
+    const valid = await verifyTwilioSignature(
+      request.url,
+      params,
+      request.headers.get("X-Twilio-Signature"),
+      env.TWILIO_AUTH_TOKEN
+    );
+    if (!valid) return json({ error: "invalid_signature" }, 401);
+    const reply = await handleTwilioSandboxMessage(params, env);
+    return new Response(toTwiml(reply), {
+      headers: { "content-type": "application/xml; charset=UTF-8" }
+    });
   }
 
   if (request.method === "POST" && url.pathname === "/webhooks/telegram") {
