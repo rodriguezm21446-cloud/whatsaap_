@@ -37,7 +37,7 @@ export default defineConfig({
       TELEGRAM_WEBHOOK_SECRET: bindings.secret(),
       GEMINI_API_KEY: bindings.secret(),
       TWILIO_AUTH_TOKEN: bindings.secret(),
-      META_GRAPH_API_VERSION: bindings.text("CONFIGURAR_ANTES_DE_DESPLEGAR"),
+      META_GRAPH_API_VERSION: bindings.text("v27.0"),
       GEMINI_MODEL: bindings.text("gemini-3.5-flash-lite"),
       BUSINESS_NAME: bindings.text("Novakira"),
       PRODUCT_NAME: bindings.text("Secadora de ropa portátil con bolsa"),
